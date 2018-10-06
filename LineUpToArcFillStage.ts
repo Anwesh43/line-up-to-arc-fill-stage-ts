@@ -26,6 +26,7 @@ class LineUpToArcFillStage {
                     this.render()
                     this.luta.update(() => {
                         this.animator.stop()
+                        this.render()
                     })
                 })
             })
@@ -101,33 +102,32 @@ class UTAFNode {
         context.fillStyle = '#283593'
         context.strokeStyle = '#283593'
         context.lineCap = 'round'
-        context.lineWidth = Math.min(w, h) / 50
+        context.lineWidth = Math.min(w, h) / 80
         const gap : number = w / (nodes + 1)
         const lsize : number = 2 * gap / 3
-        const r : number = gap / 5
+        const r : number = gap / 10
         const scale : number = this.state.scale
         context.save()
         context.translate(this.i * gap + gap, h/2)
-        context.beginPath()
-        context.moveTo(-lsize/2, 0)
-        context.lineTo(-lsize/2 + lsize * scale, 0)
-        context.stroke()
+        if (scale > 0) {
+            context.beginPath()
+            context.moveTo(-lsize/2, 0)
+            context.lineTo(-lsize/2 + lsize * scale, 0)
+            context.stroke()
+        }
         for (var i = 0; i < 2; i++) {
             const sc = Math.min(0.5, Math.max(scale - 0.5 * i, 0)) * 2
             context.beginPath()
-            for(var k = 0; k < 360 * sc; k++) {
-                const x = r * Math.cos(k * Math.PI/180), y = r * Math.sin(k * Math.PI/180)
-                if (k == 0) {
-                    context.moveTo(x, y)
-                } else {
-                    context.lineTo(x, y)
-                }
+            context.moveTo(0, -2 * r + 4 * r * i)
+            for(var k = 0; k <= 361 * sc; k++) {
+                const x = r * Math.cos(k * Math.PI/180), y = -2*r + 4 * r * i + r * Math.sin(k * Math.PI/180)
+                context.lineTo(x, y)
             }
             context.fill()
         }
         context.restore()
-        if (this.next) {
-            this.next.draw(context)
+        if (this.prev) {
+            this.prev.draw(context)
         }
     }
 
@@ -154,11 +154,10 @@ class UTAFNode {
 
 class LineUpToArcFill {
 
-    root : UTAFNode = new UTAFNode(0)
-    curr : UTAFNode = this.root
+    curr : UTAFNode = new UTAFNode(0)
     dir : number = 1
     draw(context : CanvasRenderingContext2D) {
-
+        this.curr.draw(context)
     }
 
     update(cb : Function) {
