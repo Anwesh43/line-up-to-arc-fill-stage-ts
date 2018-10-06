@@ -4,7 +4,8 @@ const nodes : number = 5
 class LineUpToArcFillStage {
     canvas : HTMLCanvasElement = document.createElement('canvas')
     context : CanvasRenderingContext2D
-
+    luta : LineUpToArcFill = new LineUpToArcFill()
+    animator : Animator = new Animator()
     initCanvas() {
         this.canvas.width = w
         this.canvas.height = h
@@ -15,16 +16,25 @@ class LineUpToArcFillStage {
     render() {
         this.context.fillStyle = '#BDBDBD'
         this.context.fillRect(0, 0, w, h)
+        this.luta.draw(this.context)
     }
 
     handleTap() {
         this.canvas.onmousedown = () => {
-
+            this.luta.startUpdating(() => {
+                this.animator.start(() => {
+                    this.render()
+                    this.luta.update(() => {
+                        this.animator.stop()
+                    })
+                })
+            })
         }
     }
 
     static init() {
         const stage : LineUpToArcFillStage = new LineUpToArcFillStage()
+        stage.initCanvas()
         stage.render()
         stage.handleTap()
     }
