@@ -71,3 +71,73 @@ class Animator {
         }
     }
 }
+
+class UTAFNode {
+    next : UTAFNode
+    prev : UTAFNode
+    state : State = new State()
+    constructor(private i : number) {
+        this.addNeighbor()
+    }
+
+    addNeighbor() {
+        if (this.i < nodes - 1) {
+            this.next = new UTAFNode(this.i + 1)
+            this.next.prev = this
+        }
+    }
+
+    draw(context : CanvasRenderingContext2D) {
+        context.fillStyle = '#283593'
+        context.strokeStyle = '#283593'
+        context.lineCap = 'round'
+        context.lineWidth = Math.min(w, h) / 50
+        const gap : number = w / (nodes + 1)
+        const lsize : number = 2 * gap / 3
+        const r : number = gap / 5
+        const scale : number = this.state.scale
+        context.save()
+        context.translate(this.i * gap + gap, h/2)
+        context.beginPath()
+        context.moveTo(-lsize/2, 0)
+        context.lineTo(-lsize/2 + lsize * scale, 0)
+        context.stroke()
+        for (var i = 0; i < 2; i++) {
+            const sc = Math.min(0.5, Math.max(scale - 0.5 * i, 0)) * 2
+            context.beginPath()
+            for(var k = 0; k < 360 * sc; k++) {
+                const x = r * Math.cos(k * Math.PI/180), y = r * Math.sin(k * Math.PI/180)
+                if (k == 0) {
+                    context.moveTo(x, y)
+                } else {
+                    context.lineTo(x, y)
+                }
+            }
+            context.fill()
+        }
+        context.restore()
+        if (this.next) {
+            this.next.draw(context)
+        }
+    }
+
+    update(cb : Function) {
+        this.state.update(cb)
+    }
+
+    startUpdating(cb : Function) {
+        this.state.startUpdating(cb)
+    }
+
+    getNext(dir : number, cb : Function) {
+        var curr : UTAFNode = this.prev
+        if (dir == 1) {
+            curr = this.next
+        }
+        if (curr) {
+            return curr
+        }
+        cb()
+        return this
+    }
+}
